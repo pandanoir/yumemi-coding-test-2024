@@ -3,6 +3,7 @@ import * as v from 'valibot';
 import { fetchApiWithCache } from './api/fetchApiWithCache';
 import { PopulationGraph } from './PopulationGraph';
 import { prefectureListApiSchema } from './api/schema';
+import './App.css';
 
 const prefectureApiPromise = fetchApiWithCache('/api/v1/prefectures').then(
   (res) => v.parse(prefectureListApiSchema, res),
@@ -21,7 +22,6 @@ export function App() {
   const deferredSelectedLabel = useDeferredValue(selectedLabel);
   return (
     <div>
-      <h1>コーディングテスト</h1>
       <select onChange={({ target }) => setSelectedLabel(target.selectedIndex)}>
         <option>総人口</option>
         <option>年少人口</option>
@@ -29,24 +29,25 @@ export function App() {
         <option>老年人口</option>
       </select>
       <br />
-
-      {prefectures.map(({ prefCode, prefName }) => (
-        <label key={prefCode}>
-          <input
-            type="checkbox"
-            checked={selectedPrefectureCodes.includes(prefCode)}
-            onChange={({ target }) => {
-              if (target.checked)
-                setSelectedPrefectures((l) => [...l, prefCode]);
-              else
-                setSelectedPrefectures((l) => l.filter((x) => x !== prefCode));
-            }}
-          />
-          {prefName}
-        </label>
-      ))}
-      <br />
-
+      <div className="prefecture-checkbox-list">
+        {prefectures.map(({ prefCode, prefName }) => (
+          <label key={prefCode}>
+            <input
+              type="checkbox"
+              checked={selectedPrefectureCodes.includes(prefCode)}
+              onChange={({ target }) => {
+                if (target.checked)
+                  setSelectedPrefectures((l) => [...l, prefCode]);
+                else
+                  setSelectedPrefectures((l) =>
+                    l.filter((x) => x !== prefCode),
+                  );
+              }}
+            />
+            {prefName}
+          </label>
+        ))}
+      </div>
       {selectedPrefectureCodes.length === 0 ? (
         '表示したい都道府県を選択してください'
       ) : (

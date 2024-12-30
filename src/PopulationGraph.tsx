@@ -4,6 +4,7 @@ import {
   Legend,
   Line,
   LineChart,
+  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -16,7 +17,9 @@ const prefectureApiPromise = fetchApiWithCache('/api/v1/prefectures').then(
   (res) => v.parse(prefectureListApiSchema, res),
 );
 
-const usePopulationApiData = (prefCodes: number[]) =>
+const usePopulationApiData = (
+  prefCodes: number[],
+): Record<number, v.InferOutput<typeof populationApiSchema>['result']> =>
   use(
     useMemo(
       () =>
@@ -67,21 +70,23 @@ export const PopulationGraph = ({
   );
 
   const graphData = useMemo(() => {
-    const yearValueMap: Record<number, { prefCode: number; value: number }[]> =
-      {};
+    const yearValueMap: Record<
+      number,
+      { prefCode: number; population: number }[]
+    > = {};
     for (const prefCode of prefectureCodes) {
       const cache = populationApiData[prefCode];
       if (!cache) continue;
       for (const { year, value } of cache.data[label].data) {
         yearValueMap[year] ??= [];
-        yearValueMap[year].push({ prefCode, value });
+        yearValueMap[year].push({ prefCode, population: value });
       }
     }
     const graphData: Record<string, string | number>[] = [];
     for (const [year, values] of Object.entries(yearValueMap)) {
       const data: Record<string, string | number> = { year };
-      for (const { prefCode, value } of values) {
-        data[`${prefCode}`] = value;
+      for (const { prefCode, population } of values) {
+        data[`${prefCode}`] = population / 10000;
       }
       graphData.push(data);
     }
@@ -89,28 +94,35 @@ export const PopulationGraph = ({
   }, [populationApiData, prefectureCodes, label]);
 
   return (
-    <LineChart
-      width={500}
-      height={300}
-      data={graphData}
-      margin={{ top: 5, right: 30, left: 60, bottom: 5 }}
-    >
-      <CartesianGrid strokeDasharray="3 3" />
-      <XAxis dataKey="year" unit="年" />
-      <YAxis unit="人" />
-      <Tooltip />
-      <Legend />
-      {prefectureCodes.map((prefCode) => (
-        <Line
-          key={prefCode}
-          type="monotone"
-          dataKey={prefCode}
-          name={prefNameMap[prefCode]}
-          stroke="#8884d8"
-          activeDot={{ r: 8 }}
-          isAnimationActive={false}
-        />
-      ))}
-    </LineChart>
+    <div className="graph-container">
+      <div>
+        <ResponsiveContainer>
+          <LineChart
+            width={500}
+            height={300}
+            data={graphData}
+            margin={{ top: 5, right: 40, left: 22, bottom: 5 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="year" unit="年" />
+            <YAxis unit="万人" />
+            <Tooltip />
+            <Legend />
+            {prefectureCodes.map((prefCode) => (
+              <Line
+                key={prefCode}
+                type="monotone"
+                dataKey={prefCode}
+                name={prefNameMap[prefCode]}
+                stroke={`hsl(${(360 / 47) * prefCode}deg 80% 40%)`}
+                activeDot={{ r: 8 }}
+                isAnimationActive={false}
+                unit="万人"
+              />
+            ))}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
   );
 };

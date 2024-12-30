@@ -1,0 +1,34 @@
+.prefecture-checkbox-list {
+  display: flex;
+  column-gap: 5px;
+  row-gap: 2px;
+  flex-wrap: wrap;
+}
+
+.prefecture-checkbox-list label {
+  cursor: pointer;
+  height: 1.25rem;
+  line-height: 1.25rem;
+  padding: 0 0.625rem;
+  border-radius: 0.625rem;
+  border: 1px solid #999;
+  user-select: none;
+}
+.prefecture-checkbox-list label:has(:checked) {
+  background: #1d4ed8; /* blue-700 */
+  border: 1px solid #3b82f6;
+  color: #fff;
+}
+
+.prefecture-checkbox-list label input[type="checkbox"] {
+  display: none;
+}
+
+.graph-container {
+  width: 100vw;
+  height: 300px;
+}
+.graph-container > div {
+  width: 100%;
+  height: 100%;
+}
