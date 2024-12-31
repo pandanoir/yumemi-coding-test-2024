@@ -10,20 +10,29 @@
     "lint:format": "biome format ./src",
     "fix:lint": "biome lint --write ./src",
     "fix:format": "biome format --write ./src",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
+    "jsdom": "25.0.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",
+    "react-error-boundary": "5.0.0",
     "recharts": "2.15.0",
+    "resize-observer-polyfill": "1.5.1",
     "valibot": "1.0.0-beta.9"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "@testing-library/dom": "10.4.0",
+    "@testing-library/react": "16.1.0",
     "@types/react": "19.0.2",
     "@types/react-dom": "19.0.2",
     "@vitejs/plugin-react": "^4.3.4",
+    "msw": "2.7.0",
     "typescript": "5.7.2",
-    "vite": "^6.0.5"
+    "vite": "^6.0.5",
+    "vitest": "2.1.8"
   }
 }

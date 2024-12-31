@@ -4,12 +4,13 @@ import { fetchApiWithCache } from './api/fetchApiWithCache';
 import { PopulationGraph } from './PopulationGraph';
 import { prefectureListApiSchema } from './api/schema';
 import './App.css';
+import { ErrorBoundary } from 'react-error-boundary';
 
 const prefectureApiPromise = fetchApiWithCache('/api/v1/prefectures').then(
   (res) => v.parse(prefectureListApiSchema, res),
 );
 
-export function App() {
+function App() {
   const prefectures = use(prefectureApiPromise).result;
   const [selectedPrefectureCodes, setSelectedPrefectures] = useState<number[]>(
     [],
@@ -71,3 +72,15 @@ export function App() {
     </div>
   );
 }
+
+function AppWithErrorHandling() {
+  return (
+    <ErrorBoundary fallback={'error!'}>
+      <Suspense fallback={'loading...'}>
+        <App />
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
+
+export { AppWithErrorHandling as App };

@@ -69,6 +69,7 @@ export const PopulationGraph = ({
     {},
   );
 
+  // { year:number, [県名]:number(人口) }[]
   const graphData = useMemo(() => {
     const yearValueMap: Record<
       number,
