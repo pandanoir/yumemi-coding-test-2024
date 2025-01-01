@@ -19,38 +19,30 @@ const prefectureApiPromise = fetchApiWithCache('/api/v1/prefectures').then(
 
 const usePopulationApiData = (
   prefCodes: number[],
-): Record<number, v.InferOutput<typeof populationApiSchema>['result']> =>
-  use(
-    useMemo(
-      () =>
-        Promise.all(
-          prefCodes.map(
-            async (prefCode) =>
-              [
-                prefCode,
-                await fetchApiWithCache(
-                  `/api/v1/population/composition/perYear?prefCode=${prefCode}`,
-                )
-                  .then((res) => v.parse(populationApiSchema, res))
-                  .then(({ result }) => result)
-                  .catch(() => null),
-              ] as const,
-          ),
-        ).then((res) => {
-          const populationData: Record<
-            number,
-            NonNullable<(typeof res)[number][1]>
-          > = {};
-          for (const [prefCode, data] of res) {
-            if (data) {
-              populationData[prefCode] = data;
-            }
-          }
-          return populationData;
-        }),
-      [prefCodes],
-    ),
-  );
+): Record<number, v.InferOutput<typeof populationApiSchema>['result']> => {
+  const prefCodePopulationTupleList = prefCodes
+    .map((prefCode) =>
+      fetchApiWithCache(
+        `/api/v1/population/composition/perYear?prefCode=${prefCode}`,
+      ),
+    )
+    .map(use)
+    .map(
+      (res, index) =>
+        [prefCodes[index], v.parse(populationApiSchema, res).result] as const,
+    );
+
+  const populationData: Record<
+    number,
+    NonNullable<(typeof prefCodePopulationTupleList)[number][1]>
+  > = {};
+  for (const [prefCode, data] of prefCodePopulationTupleList) {
+    if (data) {
+      populationData[prefCode] = data;
+    }
+  }
+  return populationData;
+};
 
 export const PopulationGraph = ({
   label,
