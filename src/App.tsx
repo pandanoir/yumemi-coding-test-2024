@@ -49,26 +49,26 @@ function App() {
           </label>
         ))}
       </div>
-      {selectedPrefectureCodes.length === 0 ? (
-        '表示したい都道府県を選択してください'
-      ) : (
-        <Suspense fallback={'loading...'}>
-          <div
-            style={{
-              opacity:
-                selectedPrefectureCodes !== deferredSelectedPrefectureCodes ||
-                selectedLabel !== deferredSelectedLabel
-                  ? 0.5
-                  : 1,
-            }}
-          >
+      <Suspense>
+        <div
+          style={{
+            opacity:
+              selectedPrefectureCodes !== deferredSelectedPrefectureCodes ||
+              selectedLabel !== deferredSelectedLabel
+                ? 0.5
+                : 1,
+          }}
+        >
+          {deferredSelectedPrefectureCodes.length === 0 ? (
+            '表示したい都道府県を選択してください'
+          ) : (
             <PopulationGraph
               prefectureCodes={deferredSelectedPrefectureCodes}
               label={deferredSelectedLabel}
             />
-          </div>
-        </Suspense>
-      )}
+          )}
+        </div>
+      </Suspense>
     </div>
   );
 }
