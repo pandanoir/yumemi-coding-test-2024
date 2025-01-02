@@ -6,8 +6,8 @@ import { prefectureListApiSchema } from './api/schema';
 import './App.css';
 import { ErrorBoundary } from 'react-error-boundary';
 
-const prefectureApiPromise = fetchApiWithCache('/api/v1/prefectures').then(
-  (res) => v.parse(prefectureListApiSchema, res),
+const prefectureApiPromise = fetchApiWithCache('/prefectures').then((res) =>
+  v.parse(prefectureListApiSchema, res),
 );
 
 function App() {

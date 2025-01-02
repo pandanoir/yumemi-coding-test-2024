@@ -13,19 +13,15 @@ import * as v from 'valibot';
 import { fetchApiWithCache } from './api/fetchApiWithCache';
 import { populationApiSchema, prefectureListApiSchema } from './api/schema';
 
-const prefectureApiPromise = fetchApiWithCache('/api/v1/prefectures').then(
-  (res) => v.parse(prefectureListApiSchema, res),
+const prefectureApiPromise = fetchApiWithCache('/prefectures').then((res) =>
+  v.parse(prefectureListApiSchema, res),
 );
 
 const usePopulationApiData = (
   prefCodes: number[],
 ): Record<number, v.InferOutput<typeof populationApiSchema>['result']> => {
   const prefCodePopulationTupleList = prefCodes
-    .map((prefCode) =>
-      fetchApiWithCache(
-        `/api/v1/population/composition/perYear?prefCode=${prefCode}`,
-      ),
-    )
+    .map((prefCode) => fetchApiWithCache(`/population?prefCode=${prefCode}`))
     .map(use)
     .map(
       (res, index) =>
