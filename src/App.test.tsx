@@ -21,13 +21,9 @@ import prefecturesFixture from '../test/fixtures/prefectures.json';
 import population47Fixture from '../test/fixtures/population47.json';
 
 const handlers = [
-  http.get(
-    'https://yumemi-frontend-engineer-codecheck-api.vercel.app/api/v1/prefectures',
-    () => HttpResponse.json(prefecturesFixture),
-  ),
-  http.get(
-    'https://yumemi-frontend-engineer-codecheck-api.vercel.app/api/v1/population/composition/perYear?prefCode=47',
-    () => HttpResponse.json(population47Fixture),
+  http.get('/api/prefectures', () => HttpResponse.json(prefecturesFixture)),
+  http.get('/api/population?prefCode=47', () =>
+    HttpResponse.json(population47Fixture),
   ),
 ];
 
@@ -73,16 +69,19 @@ describe('App', () => {
   });
 
   it('はAPIサーバーが落ちていた場合になにも表示しない', async () => {
+    const noop = () => void 0;
+    const consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+    process.on('unhandledRejection', noop);
     // Appは読み込んだ時点でfetchを開始するので、サーバーレスポンスをエラーに設定してからdynamic importしている
-    server.use(
-      http.get(
-        'https://yumemi-frontend-engineer-codecheck-api.vercel.app/api/v1/prefectures',
-        () => HttpResponse.error(),
-      ),
-    );
+    server.use(http.get('/api/prefectures', () => HttpResponse.error()));
     const App = (await import('./App')).App;
     const { asFragment } = await act(() => render(<App />));
+    await screen.findByText('error!');
     expect(asFragment()).toMatchSnapshot();
+    consoleErrorSpy.mockRestore();
+    process.off('unhandledRejection', noop);
   });
 
   it('は選択した人口を表示できる', async () => {

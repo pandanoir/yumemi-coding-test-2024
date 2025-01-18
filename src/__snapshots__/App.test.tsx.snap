@@ -304,7 +304,11 @@ exports[`App > snapshot 1`] = `
         沖縄県
       </label>
     </div>
-    表示したい都道府県を選択してください
+    <div
+      style="opacity: 1;"
+    >
+      表示したい都道府県を選択してください
+    </div>
   </div>
 </DocumentFragment>
 `;
@@ -941,7 +945,11 @@ exports[`App > は選択した人口を表示できる 1`] = `
         沖縄県
       </label>
     </div>
-    表示したい都道府県を選択してください
+    <div
+      style="opacity: 1;"
+    >
+      表示したい都道府県を選択してください
+    </div>
   </div>
 </DocumentFragment>
 `;
@@ -1250,7 +1258,11 @@ exports[`App > は選択解除された都道府県の折れ線グラフを表�
         沖縄県
       </label>
     </div>
-    表示したい都道府県を選択してください
+    <div
+      style="opacity: 1;"
+    >
+      表示したい都道府県を選択してください
+    </div>
   </div>
 </DocumentFragment>
 `;
