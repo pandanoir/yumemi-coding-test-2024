@@ -17,53 +17,41 @@ const prefectureApiPromise = fetchApiWithCache('/prefectures').then((res) =>
   v.parse(prefectureListApiSchema, res),
 );
 
-const usePopulationApiData = (
-  prefCodes: number[],
-): Record<number, v.InferOutput<typeof populationApiSchema>['result']> => {
-  const prefCodePopulationTupleList = prefCodes
-    .map((prefCode) => fetchApiWithCache(`/population?prefCode=${prefCode}`))
-    .map(use)
-    .map(
-      (res, index) =>
-        [prefCodes[index], v.parse(populationApiSchema, res).result] as const,
-    );
-
-  const populationData: Record<
-    number,
-    NonNullable<(typeof prefCodePopulationTupleList)[number][1]>
-  > = {};
-  for (const [prefCode, data] of prefCodePopulationTupleList) {
-    if (data) {
-      populationData[prefCode] = data;
-    }
-  }
-  return populationData;
-};
-
 export const PopulationGraph = ({
   label,
-  prefectureCodes,
+  selectedPrefectureCodes,
 }: {
   label: number;
-  prefectureCodes: number[];
+  selectedPrefectureCodes: number[];
 }) => {
-  const populationApiData = usePopulationApiData(prefectureCodes);
-  const prefectures = use(prefectureApiPromise).result;
-  const prefNameMap = prefectures.reduce<Record<number, string>>(
-    (acc, { prefCode, prefName }) => {
-      acc[prefCode] = prefName;
-      return acc;
-    },
-    {},
+  // {[prefCode]: prefCodeのAPIデータ}
+  const populationApiData = Object.fromEntries(
+    selectedPrefectureCodes
+      .map(
+        (prefCode) =>
+          [
+            prefCode,
+            fetchApiWithCache(`/population?prefCode=${prefCode}`),
+          ] as const,
+      )
+      .map(([prefCode, promise]) => [
+        prefCode,
+        v.parse(populationApiSchema, use(promise)).result,
+      ]),
   );
+  const prefNameMap = use(prefectureApiPromise).result.reduce<
+    Record<number, string>
+  >((acc, { prefCode, prefName }) => {
+    acc[prefCode] = prefName;
+    return acc;
+  }, {});
 
-  // { year:number, [県名]:number(人口) }[]
+  // { year:string, 県1:number(人口), 県2:number(人口), ... }[]
   const graphData = useMemo(() => {
-    const yearValueMap: Record<
-      number,
-      { prefCode: number; population: number }[]
-    > = {};
-    for (const prefCode of prefectureCodes) {
+    const yearValueMap: {
+      [year in number]: { prefCode: number; population: number }[];
+    } = {};
+    for (const prefCode of selectedPrefectureCodes) {
       const cache = populationApiData[prefCode];
       if (!cache) continue;
       for (const { year, value } of cache.data[label].data) {
@@ -71,16 +59,14 @@ export const PopulationGraph = ({
         yearValueMap[year].push({ prefCode, population: value });
       }
     }
-    const graphData: Record<string, string | number>[] = [];
-    for (const [year, values] of Object.entries(yearValueMap)) {
+    return Object.entries(yearValueMap).map(([year, values]) => {
       const data: Record<string, string | number> = { year };
       for (const { prefCode, population } of values) {
         data[`${prefCode}`] = population / 10000;
       }
-      graphData.push(data);
-    }
-    return graphData;
-  }, [populationApiData, prefectureCodes, label]);
+      return data;
+    });
+  }, [populationApiData, selectedPrefectureCodes, label]);
 
   return (
     <div className="graph-container">
@@ -97,7 +83,7 @@ export const PopulationGraph = ({
             <YAxis unit="万人" />
             <Tooltip />
             <Legend />
-            {prefectureCodes.map((prefCode) => (
+            {selectedPrefectureCodes.map((prefCode) => (
               <Line
                 key={prefCode}
                 type="monotone"

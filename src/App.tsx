@@ -63,7 +63,7 @@ function App() {
             '表示したい都道府県を選択してください'
           ) : (
             <PopulationGraph
-              prefectureCodes={deferredSelectedPrefectureCodes}
+              selectedPrefectureCodes={deferredSelectedPrefectureCodes}
               label={deferredSelectedLabel}
             />
           )}
